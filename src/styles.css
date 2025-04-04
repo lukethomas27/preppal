@@ -1,0 +1,919 @@
+/* Base styles */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #FAFAFA;
+  width: 100%;
+  min-width: 350px;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Logo styles */
+.h-10 {
+  height: 2.5rem;
+}
+
+.h-20 {
+  height: 5rem;
+}
+
+.w-auto {
+  width: auto;
+}
+
+.mr-2 {
+  margin-right: 0.5rem;
+}
+
+.mb-3 {
+  margin-bottom: 0.75rem;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Component styles */
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+  border: none;
+  cursor: pointer;
+}
+
+.btn:focus {
+  outline: none;
+}
+
+.btn-primary {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #3d8b40;
+}
+
+.btn-secondary {
+  background-color: #FFA726;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #FF9800;
+}
+
+.btn-danger {
+  background-color: rgb(239, 68, 68); /* red-500 */
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: rgb(220, 38, 38); /* red-600 */
+}
+
+.input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #4CAF50;
+  border-radius: 0.375rem;
+  box-sizing: border-box;
+  background-color: white;
+}
+
+.input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.4);
+  border-color: transparent;
+}
+
+.label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #263238;
+  margin-bottom: 0.25rem;
+}
+
+/* Authentication Form Styles */
+.max-w-md {
+  max-width: 28rem;
+  width: 100%;
+}
+
+.p-6 {
+  padding: 1.5rem;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.space-y-4 > * + * {
+  margin-top: 1rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.p-3 {
+  padding: 0.75rem;
+}
+
+.bg-red-50 {
+  background-color: rgb(254, 242, 242);
+}
+
+.border-red-200 {
+  border-color: rgb(254, 202, 202);
+}
+
+.text-red-700 {
+  color: rgb(185, 28, 28);
+}
+
+.mt-1 {
+  margin-top: 0.25rem;
+}
+
+.opacity-50 {
+  opacity: 0.5;
+}
+
+.cursor-not-allowed {
+  cursor: not-allowed;
+}
+
+/* Navbar Styles */
+.bg-white {
+  background-color: white;
+}
+
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.h-16 {
+  height: 4rem;
+}
+
+.flex {
+  display: flex;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.space-x-6 > * + * {
+  margin-left: 1.5rem;
+}
+
+.space-x-4 > * + * {
+  margin-left: 1rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.text-gray-800 {
+  color: #263238;
+}
+
+.space-x-2 > * + * {
+  margin-left: 0.5rem;
+}
+
+.text-gray-700 {
+  color: #263238;
+}
+
+.hover\:text-gray-900:hover {
+  color: #37474F;
+}
+
+.focus\:outline-none:focus {
+  outline: none;
+}
+
+.w-8 {
+  width: 2rem;
+}
+
+.h-8 {
+  height: 2rem;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+.bg-primary-100 {
+  background-color: rgba(76, 175, 80, 0.2);
+}
+
+.text-primary-700 {
+  color: #4CAF50;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.hidden {
+  display: none;
+}
+
+.sm\:block {
+  display: block;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.relative {
+  position: relative;
+}
+
+.right-0 {
+  right: 0;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+.w-48 {
+  width: 12rem;
+}
+
+.rounded-md {
+  border-radius: 0.375rem;
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.z-10 {
+  z-index: 10;
+}
+
+.z-20 {
+  z-index: 20;
+}
+
+.z-50 {
+  z-index: 50;
+}
+
+.border {
+  border-width: 1px;
+}
+
+.border-gray-100 {
+  border-color: #F0F0F0;
+}
+
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.border-b {
+  border-bottom-width: 1px;
+}
+
+.text-gray-900 {
+  color: #263238;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-xs {
+  font-size: 0.75rem;
+}
+
+.text-gray-500 {
+  color: #37474F;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.hover\:bg-gray-50:hover {
+  background-color: #F0F0F0;
+}
+
+.text-red-600 {
+  color: rgb(220, 38, 38);
+}
+
+.hover\:bg-red-50:hover {
+  background-color: rgb(254, 242, 242);
+}
+
+/* Dropdown Menu Styles */
+.dropdown-menu {
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: none;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background-color: white;
+}
+
+.dropdown-item {
+  transition: background-color 0.2s;
+  outline: none !important;
+  border: none !important;
+  background: transparent;
+  box-shadow: none !important;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+
+.dropdown-item:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.dropdown-item:hover {
+  background-color: rgba(76, 175, 80, 0.05) !important;
+}
+
+/* Reset all button styles */
+button {
+  outline: none !important;
+  border: none;
+  box-shadow: none !important;
+}
+
+button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* User avatar button specific styles */
+.user-avatar-button {
+  border: none !important;
+  outline: none !important;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
+.user-avatar-button:hover .text-gray-700 {
+  color: #4CAF50;
+}
+
+.user-avatar-button:hover .bg-primary-100 {
+  background-color: rgba(76, 175, 80, 0.3);
+}
+
+/* Override default hover background */
+.hover\:bg-gray-50:hover {
+  background-color: rgba(76, 175, 80, 0.05) !important;
+}
+
+/* Mobile menu styles */
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
+.ml-4 {
+  margin-left: 1rem;
+}
+
+.p-2 {
+  padding: 0.5rem;
+}
+
+.h-6 {
+  height: 1.5rem;
+}
+
+.w-6 {
+  width: 1.5rem;
+}
+
+.hover\:bg-gray-100:hover {
+  background-color: #F5F5F5;
+}
+
+.space-y-3 > * + * {
+  margin-top: 0.75rem;
+}
+
+.text-base {
+  font-size: 1rem;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.text-gray-600 {
+  color: #37474F;
+}
+
+.hover\:text-primary-600:hover {
+  color: #4CAF50;
+}
+
+/* Additional responsive utilities */
+@media (min-width: 640px) {
+  .sm\:px-6 {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  
+  .sm\:block {
+    display: block;
+  }
+  
+  .sm\:flex-row {
+    flex-direction: row;
+  }
+  
+  .sm\:mb-0 {
+    margin-bottom: 0;
+  }
+  
+  .sm\:gap-6 {
+    gap: 1.5rem;
+  }
+  
+  .sm\:flex {
+    display: flex;
+  }
+}
+
+@media (min-width: 768px) {
+  .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  
+  .md\:flex-row {
+    flex-direction: row;
+  }
+  
+  .md\:space-x-12 > * + * {
+    margin-left: 3rem;
+  }
+  
+  .md\:mb-0 {
+    margin-bottom: 0;
+  }
+  
+  .md\:flex {
+    display: flex;
+  }
+  
+  .md\:hidden {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .lg\:px-8 {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Layout utilities */
+.min-h-screen {
+  min-height: 100vh;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.bg-gray-50 {
+  background-color: #FAFAFA;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.text-gray-600 {
+  color: #37474F;
+}
+
+.max-w-7xl {
+  max-width: 80rem;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.py-6 {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.py-12 {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.mb-8 {
+  margin-bottom: 2rem;
+}
+
+.text-3xl {
+  font-size: 1.875rem;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.text-primary-600 {
+  color: #4CAF50;
+}
+
+.hover\:text-primary-500:hover {
+  color: #3d8b40;
+}
+
+/* Call to action styles */
+.btn-cta {
+  background-color: #FFA726;
+  color: white;
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+}
+
+.btn-cta:hover {
+  background-color: #FF9800;
+}
+
+/* Secondary accent colors */
+.text-accent {
+  color: #37474F;
+}
+
+.bg-accent {
+  background-color: #37474F;
+  color: white;
+}
+
+/* Add new footer styles */
+.border-t {
+  border-top-width: 1px;
+}
+
+.mt-auto {
+  margin-top: auto;
+}
+
+.py-8 {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.space-y-2 > * + * {
+  margin-top: 0.5rem;
+}
+
+.space-y-3 > * + * {
+  margin-top: 0.75rem;
+}
+
+.h-8 {
+  height: 2rem;
+}
+
+.h-5 {
+  height: 1.25rem;
+}
+
+.w-5 {
+  width: 1.25rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.pt-6 {
+  padding-top: 1.5rem;
+}
+
+/* Add feedback form specific styles */
+textarea.input {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.bg-green-50 {
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+.border-green-200 {
+  border-color: rgba(76, 175, 80, 0.3);
+}
+
+.text-green-700 {
+  color: #2e7d32;
+}
+
+/* Modal styles */
+.fixed {
+  position: fixed;
+}
+
+.inset-0 {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.scale-100 {
+  transform: scale(1);
+}
+
+.scale-95 {
+  transform: scale(0.95);
+}
+
+.transition-opacity {
+  transition-property: opacity;
+}
+
+.transition-transform {
+  transition-property: transform;
+}
+
+.duration-300 {
+  transition-duration: 300ms;
+}
+
+.max-h-\[90vh\] {
+  max-height: 90vh;
+}
+
+.overflow-y-auto {
+  overflow-y: auto;
+}
+
+.max-w-2xl {
+  max-width: 42rem;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+/* Grid utilities */
+.grid {
+  display: grid;
+}
+
+.grid-cols-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.gap-6 {
+  gap: 1.5rem;
+}
+
+.gap-8 {
+  gap: 2rem;
+}
+
+/* Responsive layout fixes */
+.container {
+  width: 100%;
+}
+
+/* About page specific styles */
+.w-16 {
+  width: 4rem;
+}
+
+.h-16 {
+  height: 4rem;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+/* Layout fixes */
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.flex-grow {
+  flex-grow: 1;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+/* Make sure footer spans full width */
+footer, nav {
+  width: 100%;
+  min-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Make sure all site content wraps appropriately */
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Profile Settings Styles */
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.space-y-6 > * + * {
+  margin-top: 1.5rem;
+}
+
+.bg-gray-50 {
+  background-color: #f9fafb;
+}
+
+.rounded-r-none {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.rounded-r-md {
+  border-top-right-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+}
+
+.flex-1 {
+  flex: 1 1 0%;
+}
+
+.bg-primary-600 {
+  background-color: #4CAF50;
+}
+
+.hover\:bg-primary-700:hover {
+  background-color: #3d8b40;
+}
+
+.bg-red-100 {
+  background-color: rgb(254, 226, 226);
+}
+
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
+.w-4 {
+  width: 1rem;
+}
+
+.h-4 {
+  height: 1rem;
+}
+
+.mt-8 {
+  margin-top: 2rem;
+}
+
+.mx-6 {
+  margin-left: 1.5rem;
+  margin-right: 1.5rem;
+}
+
+.py-12 {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.px-3 {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+} 

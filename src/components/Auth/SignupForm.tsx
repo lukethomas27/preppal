@@ -32,20 +32,23 @@ const SignupForm: React.FC = () => {
       const { error: signUpError } = await signUp(email, password);
       if (signUpError) {
         if (signUpError.message.includes('email')) {
-          setError('Invalid email format');
+          setError('Invalid email format or email already in use');
         } else if (signUpError.message.includes('password')) {
           setError('Password does not meet requirements');
         } else {
-          setError(signUpError.message);
+          setError(signUpError.message || 'Failed to create account. Please try again.');
         }
+        setLoading(false);
         return;
       }
 
-      // Redirect to home page after successful signup and sign-in
-      navigate('/');
+      // Show success message and redirect to login
+      setError('Account created successfully! Please check your email to confirm your account.');
+      setTimeout(() => {
+        navigate('/login');
+      }, 3000);
     } catch (err) {
-      setError('Failed to create account. Please try again.');
-    } finally {
+      setError('An unexpected error occurred. Please try again.');
       setLoading(false);
     }
   };

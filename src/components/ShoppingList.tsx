@@ -7,13 +7,16 @@ interface ShoppingListProps {
 
 const ShoppingList: React.FC<ShoppingListProps> = ({ items }) => {
   // Group items by category
-  const itemsByCategory = items.reduce((acc, item) => {
-    if (!acc[item.category]) {
-      acc[item.category] = [];
-    }
-    acc[item.category].push(item);
-    return acc;
-  }, {} as Record<string, ShoppingItem[]>);
+  const itemsByCategory = items.reduce(
+    (acc, item) => {
+      if (!acc[item.category]) {
+        acc[item.category] = [];
+      }
+      acc[item.category].push(item);
+      return acc;
+    },
+    {} as Record<string, ShoppingItem[]>
+  );
 
   return (
     <div className="shopping-list">
@@ -37,4 +40,4 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ items }) => {
   );
 };
 
-export default ShoppingList; 
+export default ShoppingList;

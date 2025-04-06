@@ -9,6 +9,8 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import AboutPage from './pages/AboutPage';
 import ProfilePage from './pages/ProfilePage';
+import { EmailVerification } from './components/Auth/EmailVerification';
+import { PasswordReset } from './components/Auth/PasswordReset';
 import './App.css';
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -45,18 +47,12 @@ const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-grow">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-3">
-            <img 
-              src="/preppal-logo.png" 
-              alt="PrepPal Logo" 
-              className="h-20 w-auto" 
-            />
+            <img src="/preppal-logo.png" alt="PrepPal Logo" className="h-20 w-auto" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900">PrepPal</h1>
           <p className="mt-2 text-lg text-gray-600">Your AI-Powered Meal Prep Assistant</p>
         </div>
-        <div className="flex justify-center w-full">
-          {children}
-        </div>
+        <div className="flex justify-center w-full">{children}</div>
       </div>
       <Footer />
     </div>
@@ -68,9 +64,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <div className="min-h-screen bg-gray-50 flex flex-col w-full">
       <Navbar />
       <main className="w-full flex-grow">
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          {children}
-        </div>
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">{children}</div>
       </main>
       <Footer />
     </div>
@@ -95,6 +89,22 @@ const App: React.FC = () => {
             element={
               <AuthLayout>
                 <SignupForm />
+              </AuthLayout>
+            }
+          />
+          <Route
+            path="/verify"
+            element={
+              <AuthLayout>
+                <EmailVerification />
+              </AuthLayout>
+            }
+          />
+          <Route
+            path="/reset-password"
+            element={
+              <AuthLayout>
+                <PasswordReset />
               </AuthLayout>
             }
           />

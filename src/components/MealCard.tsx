@@ -48,7 +48,7 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
           </div>
         )}
       </div>
-      
+
       <div className="ingredients-section">
         <h4>Ingredients</h4>
         <ul className="ingredients-list">
@@ -63,16 +63,13 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
       <div className="instructions-section">
         <div className="instructions-header">
           <h4>Instructions</h4>
-          <button 
-            onClick={() => setShowTimer(!showTimer)}
-            className="timer-toggle-button"
-          >
+          <button onClick={() => setShowTimer(!showTimer)} className="timer-toggle-button">
             {showTimer ? 'Hide Timer' : 'Show Timer'}
           </button>
         </div>
-        
+
         {showTimer ? (
-          <CookingTimer 
+          <CookingTimer
             steps={timerSteps}
             onComplete={() => {
               // You could add a completion handler here
@@ -91,4 +88,4 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
   );
 };
 
-export default MealCard; 
+export default MealCard;

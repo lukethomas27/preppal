@@ -24,7 +24,7 @@ const MealPlanningForm: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const plan = await generateMealPlan(preferences);
       setGeneratedPlan(plan);
@@ -54,7 +54,7 @@ const MealPlanningForm: React.FC = () => {
           <select
             id="dietType"
             value={preferences.dietType}
-            onChange={(e) => setPreferences({ ...preferences, dietType: e.target.value as any })}
+            onChange={e => setPreferences({ ...preferences, dietType: e.target.value as any })}
           >
             <option value="omnivore">Omnivore</option>
             <option value="vegetarian">Vegetarian</option>
@@ -69,7 +69,7 @@ const MealPlanningForm: React.FC = () => {
             type="number"
             id="budget"
             value={preferences.budget}
-            onChange={(e) => setPreferences({ ...preferences, budget: Number(e.target.value) })}
+            onChange={e => setPreferences({ ...preferences, budget: Number(e.target.value) })}
             min="0"
           />
         </div>
@@ -80,7 +80,9 @@ const MealPlanningForm: React.FC = () => {
             type="number"
             id="timeConstraints"
             value={preferences.timeConstraints}
-            onChange={(e) => setPreferences({ ...preferences, timeConstraints: Number(e.target.value) })}
+            onChange={e =>
+              setPreferences({ ...preferences, timeConstraints: Number(e.target.value) })
+            }
             min="0"
           />
         </div>
@@ -90,7 +92,7 @@ const MealPlanningForm: React.FC = () => {
           <select
             id="proteinGoal"
             value={preferences.proteinGoal}
-            onChange={(e) => setPreferences({ ...preferences, proteinGoal: e.target.value as any })}
+            onChange={e => setPreferences({ ...preferences, proteinGoal: e.target.value as any })}
           >
             <option value="low">Low</option>
             <option value="moderate">Moderate</option>
@@ -98,11 +100,7 @@ const MealPlanningForm: React.FC = () => {
           </select>
         </div>
 
-        <button 
-          type="submit" 
-          className="generate-plan-button"
-          disabled={isLoading}
-        >
+        <button type="submit" className="generate-plan-button" disabled={isLoading}>
           {isLoading ? 'Generating...' : 'Generate Meal Plan'}
         </button>
       </form>
@@ -115,10 +113,7 @@ const MealPlanningForm: React.FC = () => {
             <h3>Your Meal Plan</h3>
             <p>Total Prep Time: {generatedPlan.prepTime} minutes</p>
             <p>Estimated Cost: ${generatedPlan.totalCost.toFixed(2)}</p>
-            <button 
-              onClick={handleSavePlan}
-              className="save-plan-button"
-            >
+            <button onClick={handleSavePlan} className="save-plan-button">
               Save Plan
             </button>
           </div>
@@ -126,7 +121,7 @@ const MealPlanningForm: React.FC = () => {
           <div className="meals-container">
             <h3>Meals</h3>
             <div className="meals-grid">
-              {generatedPlan.meals.map((meal) => (
+              {generatedPlan.meals.map(meal => (
                 <MealCard key={meal.id} meal={meal} />
               ))}
             </div>
@@ -138,7 +133,7 @@ const MealPlanningForm: React.FC = () => {
         </div>
       )}
 
-      <button 
+      <button
         onClick={() => setShowSavedPlans(!showSavedPlans)}
         className="toggle-saved-plans-button"
       >
@@ -150,4 +145,4 @@ const MealPlanningForm: React.FC = () => {
   );
 };
 
-export default MealPlanningForm; 
+export default MealPlanningForm;

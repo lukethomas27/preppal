@@ -30,13 +30,13 @@ const CookingTimer: React.FC<CookingTimerProps> = ({ steps, onComplete }) => {
 
     if (isRunning && timeLeft > 0) {
       timer = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
+        setTimeLeft(prev => prev - 1);
       }, 1000);
     } else if (timeLeft === 0 && currentStep < steps.length - 1) {
       // Play sound when step is complete
       audioRef.current?.play();
       // Move to next step
-      setCurrentStep((prev) => prev + 1);
+      setCurrentStep(prev => prev + 1);
       setTimeLeft(steps[currentStep + 1].customDuration || steps[currentStep + 1].duration);
     } else if (timeLeft === 0 && currentStep === steps.length - 1) {
       // All steps complete
@@ -87,7 +87,7 @@ const CookingTimer: React.FC<CookingTimerProps> = ({ steps, onComplete }) => {
 
   const handleSkipStep = () => {
     if (currentStep < steps.length - 1) {
-      setCurrentStep((prev) => prev + 1);
+      setCurrentStep(prev => prev + 1);
       setTimeLeft(steps[currentStep + 1].customDuration || steps[currentStep + 1].duration);
     }
   };
@@ -95,7 +95,9 @@ const CookingTimer: React.FC<CookingTimerProps> = ({ steps, onComplete }) => {
   return (
     <div className="cooking-timer">
       <div className="timer-display">
-        <h3>Step {currentStep + 1} of {steps.length}</h3>
+        <h3>
+          Step {currentStep + 1} of {steps.length}
+        </h3>
         <div className="time">{formatTime(timeLeft)}</div>
         <div className="current-instruction">{steps[currentStep].instruction}</div>
       </div>
@@ -138,13 +140,15 @@ const CookingTimer: React.FC<CookingTimerProps> = ({ steps, onComplete }) => {
           <input
             type="number"
             value={customTime}
-            onChange={(e) => setCustomTime(e.target.value)}
+            onChange={e => setCustomTime(e.target.value)}
             placeholder="Enter minutes"
             min="1"
           />
-          <button type="submit" className="timer-button">Set</button>
-          <button 
-            type="button" 
+          <button type="submit" className="timer-button">
+            Set
+          </button>
+          <button
+            type="button"
             onClick={() => setShowCustomTimeInput(false)}
             className="timer-button cancel"
           >
@@ -169,4 +173,4 @@ const CookingTimer: React.FC<CookingTimerProps> = ({ steps, onComplete }) => {
   );
 };
 
-export default CookingTimer; 
+export default CookingTimer;

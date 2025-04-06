@@ -31,10 +31,15 @@ const SignupForm: React.FC = () => {
     try {
       const { error: signUpError } = await signUp(email, password);
       if (signUpError) {
+        console.error('Signup error in form:', signUpError);
         if (signUpError.message.includes('email')) {
           setError('Invalid email format or email already in use');
         } else if (signUpError.message.includes('password')) {
           setError('Password does not meet requirements');
+        } else if (signUpError.message.includes('network')) {
+          setError('Network error. Please check your connection and try again.');
+        } else if (signUpError.status === 500) {
+          setError('Server error. Please try again later or contact support.');
         } else {
           setError(signUpError.message || 'Failed to create account. Please try again.');
         }
@@ -48,21 +53,24 @@ const SignupForm: React.FC = () => {
         navigate('/login');
       }, 3000);
     } catch (err) {
+      console.error('Unexpected error in form:', err);
       setError('An unexpected error occurred. Please try again.');
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-md w-full mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">Create Your PrepPal Account</h2>
+    <div className="form-container">
+      <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">
+        Create Your PrepPal Account
+      </h2>
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
           {error}
         </div>
       )}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
+        <div className="form-field">
           <label htmlFor="email" className="label">
             Email
           </label>
@@ -70,13 +78,13 @@ const SignupForm: React.FC = () => {
             type="email"
             id="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={e => setEmail(e.target.value)}
             required
             disabled={loading}
             className="input"
           />
         </div>
-        <div>
+        <div className="form-field">
           <label htmlFor="password" className="label">
             Password
           </label>
@@ -84,17 +92,15 @@ const SignupForm: React.FC = () => {
             type="password"
             id="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={e => setPassword(e.target.value)}
             required
             disabled={loading}
             minLength={6}
             className="input"
           />
-          <p className="mt-1 text-sm text-gray-500">
-            Password must be at least 6 characters long
-          </p>
+          <p className="mt-1 text-sm text-gray-500">Password must be at least 6 characters long</p>
         </div>
-        <div>
+        <div className="form-field">
           <label htmlFor="confirmPassword" className="label">
             Confirm Password
           </label>
@@ -102,14 +108,14 @@ const SignupForm: React.FC = () => {
             type="password"
             id="confirmPassword"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={e => setConfirmPassword(e.target.value)}
             required
             disabled={loading}
             className="input"
           />
         </div>
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           className={`w-full btn btn-primary ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
           disabled={loading}
         >
@@ -117,7 +123,7 @@ const SignupForm: React.FC = () => {
         </button>
         <div className="text-center mt-4">
           <p className="text-sm text-gray-600 mb-2">Already have an account?</p>
-          <button 
+          <button
             type="button"
             onClick={() => navigate('/login')}
             className="btn btn-secondary w-full"
@@ -130,4 +136,4 @@ const SignupForm: React.FC = () => {
   );
 };
 
-export default SignupForm; 
+export default SignupForm;

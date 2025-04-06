@@ -1,40 +1,33 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import FeedbackModal from './FeedbackModal';
+import { Menu, X } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  
-  // Handle click outside to close the dropdown
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowProfileMenu(false);
       }
     };
-    
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Listen for feedback modal request event
   useEffect(() => {
-    const handleOpenFeedbackRequest = () => {
-      setShowFeedbackModal(true);
-    };
-    
+    const handleOpenFeedbackRequest = () => setShowFeedbackModal(true);
     document.addEventListener('openFeedbackModalRequest', handleOpenFeedbackRequest);
-    return () => {
+    return () =>
       document.removeEventListener('openFeedbackModalRequest', handleOpenFeedbackRequest);
-    };
   }, []);
 
   const handleLogout = async () => {
@@ -52,95 +45,67 @@ const Navbar: React.FC = () => {
     setShowFeedbackModal(true);
   };
 
+  const navLinks = [
+    { to: '/', label: 'Home' },
+    { to: '/saved-plans', label: 'Saved Plans' },
+    { to: '/about', label: 'About' },
+  ];
+
+  const navLinkClass = (path: string) =>
+    `text-sm font-medium ${location.pathname === path ? 'text-green-600' : 'text-gray-600'} hover:text-green-600 transition`;
+
   return (
     <nav className="w-full bg-white shadow-sm sticky top-0 z-50">
-      <div className="container mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <img 
-                src="/preppal-logo.png" 
-                alt="PrepPal Logo" 
-                className="h-10 w-auto"
-              />
-              <span className="text-xl font-bold text-primary">PrepPal</span>
-            </Link>
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-2">
+            <img src="/preppal-logo.png" alt="PrepPal Logo" className="h-8 w-auto" />
+            <span className="text-lg font-bold text-green-600">PrepPal</span>
+          </Link>
+
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center space-x-3">
+            {navLinks.map(({ to, label }) => {
+              const isActive = location.pathname === to;
+              return (
+                <Link
+                  key={to}
+                  to={to}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                    ${
+                      isActive
+                        ? 'bg-primary text-white shadow-sm'
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-primary'
+                    }`}
+                >
+                  {label}
+                </Link>
+              );
+            })}
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
-            <Link 
-              to="/" 
-              className="text-gray-600 hover:text-primary transition-colors duration-200"
-            >
-              Home
-            </Link>
-            <Link 
-              to="/saved-plans" 
-              className="text-gray-600 hover:text-primary transition-colors duration-200"
-            >
-              Saved Plans
-            </Link>
-            <Link 
-              to="/about" 
-              className="text-gray-600 hover:text-primary transition-colors duration-200"
-            >
-              About
-            </Link>
-            <button
-              onClick={handleOpenFeedback}
-              className="text-gray-600 hover:text-primary transition-colors duration-200"
-            >
-              Send Feedback
-            </button>
-          </div>
-
-          {/* Mobile menu button */}
+          {/* Mobile Menu Toggle */}
           <div className="md:hidden">
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="p-2 rounded-md text-gray-600 hover:text-primary hover:bg-gray-100 focus:outline-none"
+              className="p-2 text-gray-600 hover:text-green-600 focus:outline-none"
             >
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                {showMobileMenu ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                )}
-              </svg>
+              {showMobileMenu ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
 
-          {/* Profile Menu */}
-          <div className="hidden md:flex items-center ml-6" ref={menuRef}>
+          {/* Profile Icon */}
+          <div className="hidden md:flex items-center relative" ref={menuRef}>
             <button
               onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="flex items-center space-x-2 focus:outline-none"
+              className="ml-4 h-8 w-8 rounded-full bg-green-100 text-green-600 font-semibold flex items-center justify-center"
             >
-              <div className="h-8 w-8 rounded-full bg-primary-light flex items-center justify-center">
-                <span className="text-primary font-semibold">
-                  {user?.email?.[0].toUpperCase() || 'U'}
-                </span>
-              </div>
+              {user?.email?.[0].toUpperCase() || 'U'}
             </button>
 
             {showProfileMenu && (
-              <div className="absolute right-4 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 animate-fade-in">
+              <div className="absolute right-0 mt-10 w-48 bg-white rounded-md shadow-lg py-2 z-50 animate-fade-in">
                 <Link
                   to="/profile"
                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -150,7 +115,7 @@ const Navbar: React.FC = () => {
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
                   Sign Out
                 </button>
@@ -159,47 +124,47 @@ const Navbar: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu Dropdown */}
         {showMobileMenu && (
-          <div className="md:hidden animate-fade-in">
-            <div className="px-2 pt-2 pb-3 space-y-1">
+          <div className="md:hidden mt-2 border-t border-gray-100 pt-4">
+            <div className="space-y-2 pb-4">
               <Link
                 to="/"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50"
+                className="block px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-md"
                 onClick={() => setShowMobileMenu(false)}
               >
                 Home
               </Link>
               <Link
                 to="/saved-plans"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50"
+                className="block px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-md"
                 onClick={() => setShowMobileMenu(false)}
               >
                 Saved Plans
               </Link>
               <Link
                 to="/about"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50"
+                className="block px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-md"
                 onClick={() => setShowMobileMenu(false)}
               >
                 About
               </Link>
               <button
                 onClick={handleOpenFeedback}
-                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50"
+                className="w-full text-left px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-md"
               >
                 Send Feedback
               </button>
               <Link
                 to="/profile"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50"
+                className="block px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-md"
                 onClick={() => setShowMobileMenu(false)}
               >
                 Profile Settings
               </Link>
               <button
                 onClick={handleLogout}
-                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50"
+                className="w-full text-left px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-md"
               >
                 Sign Out
               </button>
@@ -208,12 +173,9 @@ const Navbar: React.FC = () => {
         )}
       </div>
 
-      <FeedbackModal
-        isOpen={showFeedbackModal}
-        onClose={() => setShowFeedbackModal(false)}
-      />
+      <FeedbackModal isOpen={showFeedbackModal} onClose={() => setShowFeedbackModal(false)} />
     </nav>
   );
 };
 
-export default Navbar; 
+export default Navbar;

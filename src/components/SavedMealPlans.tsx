@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { MealPlan } from '../types';
-import { getSavedMealPlans, deleteMealPlan, exportMealPlanAsPDF, exportMealPlanAsCalendar } from '../services/mealPlanStorage';
+import {
+  getSavedMealPlans,
+  deleteMealPlan,
+  exportMealPlanAsPDF,
+  exportMealPlanAsCalendar,
+} from '../services/mealPlanStorage';
 
 const SavedMealPlans: React.FC = () => {
   const [savedPlans, setSavedPlans] = useState<MealPlan[]>([]);
@@ -68,7 +73,7 @@ const SavedMealPlans: React.FC = () => {
     <div className="saved-plans">
       <h3>Saved Meal Plans</h3>
       <div className="plans-grid">
-        {savedPlans.map((plan) => (
+        {savedPlans.map(plan => (
           <div key={plan.id} className="saved-plan-card">
             <h4>{plan.meals[0].name}</h4>
             <div className="plan-details">
@@ -77,22 +82,13 @@ const SavedMealPlans: React.FC = () => {
               <p>Number of Meals: {plan.meals.length}</p>
             </div>
             <div className="plan-actions">
-              <button 
-                onClick={() => handleExportPDF(plan)}
-                className="export-button pdf"
-              >
+              <button onClick={() => handleExportPDF(plan)} className="export-button pdf">
                 Export PDF
               </button>
-              <button 
-                onClick={() => handleExportCalendar(plan)}
-                className="export-button calendar"
-              >
+              <button onClick={() => handleExportCalendar(plan)} className="export-button calendar">
                 Add to Calendar
               </button>
-              <button 
-                onClick={() => handleDelete(plan.id)}
-                className="delete-button"
-              >
+              <button onClick={() => handleDelete(plan.id)} className="delete-button">
                 Delete
               </button>
             </div>
@@ -103,4 +99,4 @@ const SavedMealPlans: React.FC = () => {
   );
 };
 
-export default SavedMealPlans; 
+export default SavedMealPlans;

@@ -30,7 +30,7 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md w-full mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="form-container">
       <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">Log In to PrepPal</h2>
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
@@ -38,7 +38,7 @@ const LoginForm: React.FC = () => {
         </div>
       )}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
+        <div className="form-field">
           <label htmlFor="email" className="label">
             Email
           </label>
@@ -46,13 +46,13 @@ const LoginForm: React.FC = () => {
             type="email"
             id="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={e => setEmail(e.target.value)}
             required
             disabled={loading}
             className="input"
           />
         </div>
-        <div>
+        <div className="form-field">
           <label htmlFor="password" className="label">
             Password
           </label>
@@ -60,14 +60,14 @@ const LoginForm: React.FC = () => {
             type="password"
             id="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={e => setPassword(e.target.value)}
             required
             disabled={loading}
             className="input"
           />
         </div>
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           className={`w-full btn btn-primary ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
           disabled={loading}
         >
@@ -75,7 +75,7 @@ const LoginForm: React.FC = () => {
         </button>
         <div className="text-center mt-4">
           <p className="text-sm text-gray-600 mb-2">Don't have an account?</p>
-          <button 
+          <button
             type="button"
             onClick={() => navigate('/signup')}
             className="btn btn-secondary w-full"
@@ -88,4 +88,4 @@ const LoginForm: React.FC = () => {
   );
 };
 
-export default LoginForm; 
+export default LoginForm;

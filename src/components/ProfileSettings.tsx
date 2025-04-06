@@ -18,7 +18,7 @@ const ProfileSettings: React.FC = () => {
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  
+
   const [profile, setProfile] = useState<UserProfile>({
     id: user?.id || '',
     full_name: '',
@@ -26,25 +26,39 @@ const ProfileSettings: React.FC = () => {
     dietary_preferences: [],
     allergies: [],
     cooking_skill: 'intermediate',
-    household_size: 1
+    household_size: 1,
   });
-  
+
   const [newAllergy, setNewAllergy] = useState('');
   const [newPreference, setNewPreference] = useState('');
-  
+
   // Common dietary preferences options
   const dietaryOptions = [
-    'Vegetarian', 'Vegan', 'Gluten-Free', 'Keto', 
-    'Paleo', 'Low-Carb', 'Low-Fat', 'Pescatarian',
-    'Mediterranean', 'Dairy-Free'
+    'Vegetarian',
+    'Vegan',
+    'Gluten-Free',
+    'Keto',
+    'Paleo',
+    'Low-Carb',
+    'Low-Fat',
+    'Pescatarian',
+    'Mediterranean',
+    'Dairy-Free',
   ];
-  
+
   // Common allergies options
   const allergyOptions = [
-    'Peanuts', 'Tree Nuts', 'Milk', 'Eggs', 'Fish',
-    'Shellfish', 'Soy', 'Wheat', 'Gluten'
+    'Peanuts',
+    'Tree Nuts',
+    'Milk',
+    'Eggs',
+    'Fish',
+    'Shellfish',
+    'Soy',
+    'Wheat',
+    'Gluten',
   ];
-  
+
   // Cooking skill levels
   const skillLevels = ['beginner', 'intermediate', 'advanced'];
 
@@ -57,15 +71,15 @@ const ProfileSettings: React.FC = () => {
   const getProfile = async () => {
     try {
       setLoading(true);
-      
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user?.id)
         .single();
-      
+
       if (error) throw error;
-      
+
       if (data) {
         setProfile({
           id: data.id,
@@ -74,7 +88,7 @@ const ProfileSettings: React.FC = () => {
           dietary_preferences: data.dietary_preferences || [],
           allergies: data.allergies || [],
           cooking_skill: data.cooking_skill || 'intermediate',
-          household_size: data.household_size || 1
+          household_size: data.household_size || 1,
         });
       }
     } catch (error) {
@@ -86,12 +100,12 @@ const ProfileSettings: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       setUpdating(true);
       setError(null);
       setSuccess(false);
-      
+
       const { error } = await supabase.from('profiles').upsert({
         id: user?.id,
         full_name: profile.full_name,
@@ -100,11 +114,11 @@ const ProfileSettings: React.FC = () => {
         allergies: profile.allergies,
         cooking_skill: profile.cooking_skill,
         household_size: profile.household_size,
-        updated_at: new Date()
+        updated_at: new Date(),
       });
-      
+
       if (error) throw error;
-      
+
       setSuccess(true);
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -118,7 +132,7 @@ const ProfileSettings: React.FC = () => {
     if (newAllergy && !profile.allergies.includes(newAllergy)) {
       setProfile({
         ...profile,
-        allergies: [...profile.allergies, newAllergy]
+        allergies: [...profile.allergies, newAllergy],
       });
       setNewAllergy('');
     }
@@ -127,7 +141,7 @@ const ProfileSettings: React.FC = () => {
   const handleRemoveAllergy = (allergy: string) => {
     setProfile({
       ...profile,
-      allergies: profile.allergies.filter(a => a !== allergy)
+      allergies: profile.allergies.filter(a => a !== allergy),
     });
   };
 
@@ -135,7 +149,7 @@ const ProfileSettings: React.FC = () => {
     if (newPreference && !profile.dietary_preferences.includes(newPreference)) {
       setProfile({
         ...profile,
-        dietary_preferences: [...profile.dietary_preferences, newPreference]
+        dietary_preferences: [...profile.dietary_preferences, newPreference],
       });
       setNewPreference('');
     }
@@ -144,7 +158,7 @@ const ProfileSettings: React.FC = () => {
   const handleRemovePreference = (preference: string) => {
     setProfile({
       ...profile,
-      dietary_preferences: profile.dietary_preferences.filter(p => p !== preference)
+      dietary_preferences: profile.dietary_preferences.filter(p => p !== preference),
     });
   };
 
@@ -160,27 +174,27 @@ const ProfileSettings: React.FC = () => {
     <div className="w-full bg-white shadow-md rounded-lg overflow-hidden">
       <div className="p-6 border-b border-gray-100">
         <h1 className="text-2xl font-bold text-gray-900">Profile Settings</h1>
-        <p className="text-gray-600 mt-1">
-          Update your personal information and preferences
-        </p>
+        <p className="text-gray-600 mt-1">Update your personal information and preferences</p>
       </div>
-      
+
       {error && (
         <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
           {error}
         </div>
       )}
-      
+
       {success && (
         <div className="mx-6 mt-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-md text-sm">
           Profile updated successfully!
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit} className="p-6">
         <div className="space-y-6">
           <div>
-            <label htmlFor="email" className="label">Email</label>
+            <label htmlFor="email" className="label">
+              Email
+            </label>
             <input
               type="email"
               id="email"
@@ -188,13 +202,13 @@ const ProfileSettings: React.FC = () => {
               disabled
               className="input bg-gray-50"
             />
-            <p className="mt-1 text-xs text-gray-500">
-              Email cannot be changed
-            </p>
+            <p className="mt-1 text-xs text-gray-500">Email cannot be changed</p>
           </div>
-          
+
           <div>
-            <label htmlFor="fullName" className="label">Full Name</label>
+            <label htmlFor="fullName" className="label">
+              Full Name
+            </label>
             <input
               type="text"
               id="fullName"
@@ -204,9 +218,11 @@ const ProfileSettings: React.FC = () => {
               placeholder="Your full name"
             />
           </div>
-          
+
           <div>
-            <label htmlFor="cookingSkill" className="label">Cooking Skill Level</label>
+            <label htmlFor="cookingSkill" className="label">
+              Cooking Skill Level
+            </label>
             <select
               id="cookingSkill"
               value={profile.cooking_skill}
@@ -220,9 +236,11 @@ const ProfileSettings: React.FC = () => {
               ))}
             </select>
           </div>
-          
+
           <div>
-            <label htmlFor="householdSize" className="label">Household Size</label>
+            <label htmlFor="householdSize" className="label">
+              Household Size
+            </label>
             <input
               type="number"
               id="householdSize"
@@ -233,13 +251,13 @@ const ProfileSettings: React.FC = () => {
               className="input"
             />
           </div>
-          
+
           <div>
             <label className="label">Dietary Preferences</label>
             <div className="flex flex-wrap gap-2 mb-2">
               {profile.dietary_preferences.map(preference => (
-                <div 
-                  key={preference} 
+                <div
+                  key={preference}
                   className="bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-sm flex items-center"
                 >
                   {preference}
@@ -248,14 +266,25 @@ const ProfileSettings: React.FC = () => {
                     onClick={() => handleRemovePreference(preference)}
                     className="ml-2 focus:outline-none"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
               ))}
             </div>
-            
+
             <div className="flex">
               <select
                 value={newPreference}
@@ -266,9 +295,10 @@ const ProfileSettings: React.FC = () => {
                 {dietaryOptions
                   .filter(option => !profile.dietary_preferences.includes(option))
                   .map(option => (
-                    <option key={option} value={option}>{option}</option>
-                  ))
-                }
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
               </select>
               <button
                 type="button"
@@ -279,13 +309,13 @@ const ProfileSettings: React.FC = () => {
               </button>
             </div>
           </div>
-          
+
           <div>
             <label className="label">Food Allergies</label>
             <div className="flex flex-wrap gap-2 mb-2">
               {profile.allergies.map(allergy => (
-                <div 
-                  key={allergy} 
+                <div
+                  key={allergy}
                   className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm flex items-center"
                 >
                   {allergy}
@@ -294,14 +324,25 @@ const ProfileSettings: React.FC = () => {
                     onClick={() => handleRemoveAllergy(allergy)}
                     className="ml-2 focus:outline-none"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
               ))}
             </div>
-            
+
             <div className="flex">
               <select
                 value={newAllergy}
@@ -312,9 +353,10 @@ const ProfileSettings: React.FC = () => {
                 {allergyOptions
                   .filter(option => !profile.allergies.includes(option))
                   .map(option => (
-                    <option key={option} value={option}>{option}</option>
-                  ))
-                }
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
               </select>
               <button
                 type="button"
@@ -326,7 +368,7 @@ const ProfileSettings: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="mt-8">
           <button
             type="submit"
@@ -341,4 +383,4 @@ const ProfileSettings: React.FC = () => {
   );
 };
 
-export default ProfileSettings; 
+export default ProfileSettings;

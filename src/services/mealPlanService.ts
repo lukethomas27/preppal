@@ -76,4 +76,4 @@ export const generateMealPlan = async (preferences: MealPreferences): Promise<Me
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 1000));
   return generateMockMealPlan(preferences);
-}; 
+};

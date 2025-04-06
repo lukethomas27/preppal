@@ -43,18 +43,16 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess }) => {
     }
 
     try {
-      const { error: insertError } = await supabase
-        .from('feedback')
-        .insert([
-          {
-            user_id: user?.id || null,
-            email: user?.email || 'anonymous',
-            feedback_type: feedbackType,
-            title: title.trim(),
-            description: description.trim(),
-            status: 'new'
-          }
-        ]);
+      const { error: insertError } = await supabase.from('feedback').insert([
+        {
+          user_id: user?.id || null,
+          email: user?.email || 'anonymous',
+          feedback_type: feedbackType,
+          title: title.trim(),
+          description: description.trim(),
+          status: 'new',
+        },
+      ]);
 
       if (insertError) {
         throw new Error(insertError.message);
@@ -64,7 +62,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess }) => {
       setTitle('');
       setDescription('');
       setFeedbackType('suggestion');
-      
+
       if (onSuccess) {
         onSuccess();
       }
@@ -83,13 +81,13 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess }) => {
           {error}
         </div>
       )}
-      
+
       {success && (
         <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-md text-sm">
           Thank you for your feedback! We appreciate your input.
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="feedbackType" className="label">
@@ -98,7 +96,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess }) => {
           <select
             id="feedbackType"
             value={feedbackType}
-            onChange={(e) => setFeedbackType(e.target.value)}
+            onChange={e => setFeedbackType(e.target.value)}
             className="input"
             disabled={loading}
           >
@@ -108,7 +106,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess }) => {
             <option value="other">Other</option>
           </select>
         </div>
-        
+
         <div>
           <label htmlFor="title" className="label">
             Title
@@ -117,14 +115,14 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess }) => {
             type="text"
             id="title"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={e => setTitle(e.target.value)}
             placeholder="Brief summary of your feedback"
             required
             disabled={loading}
             className="input"
           />
         </div>
-        
+
         <div>
           <label htmlFor="description" className="label">
             Description
@@ -132,7 +130,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess }) => {
           <textarea
             id="description"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={e => setDescription(e.target.value)}
             placeholder="Please provide details about your feedback"
             required
             disabled={loading}
@@ -140,9 +138,9 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess }) => {
             className="input"
           />
         </div>
-        
-        <button 
-          type="submit" 
+
+        <button
+          type="submit"
           className={`w-full btn btn-primary ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
           disabled={loading}
         >
@@ -153,4 +151,4 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess }) => {
   );
 };
 
-export default FeedbackForm; 
+export default FeedbackForm;

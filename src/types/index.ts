@@ -39,4 +39,4 @@ export interface ShoppingItem {
   amount: number;
   unit: string;
   category: string;
-} 
+}

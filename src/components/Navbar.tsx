@@ -3,32 +3,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import FeedbackModal from './FeedbackModal';
 import { Menu, X } from 'lucide-react';
+import { Popover } from '@headlessui/react';
 
 const Navbar: React.FC = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowProfileMenu(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    const handleOpenFeedbackRequest = () => setShowFeedbackModal(true);
-    document.addEventListener('openFeedbackModalRequest', handleOpenFeedbackRequest);
-    return () =>
-      document.removeEventListener('openFeedbackModalRequest', handleOpenFeedbackRequest);
-  }, []);
 
   const handleLogout = async () => {
     try {
@@ -39,20 +21,11 @@ const Navbar: React.FC = () => {
     }
   };
 
-  const handleOpenFeedback = () => {
-    setShowProfileMenu(false);
-    setShowMobileMenu(false);
-    setShowFeedbackModal(true);
-  };
-
   const navLinks = [
     { to: '/', label: 'Home' },
     { to: '/saved-plans', label: 'Saved Plans' },
     { to: '/about', label: 'About' },
   ];
-
-  const navLinkClass = (path: string) =>
-    `text-sm font-medium ${location.pathname === path ? 'text-green-600' : 'text-gray-600'} hover:text-green-600 transition`;
 
   return (
     <nav className="w-full bg-white shadow-sm sticky top-0 z-50">
@@ -66,85 +39,103 @@ const Navbar: React.FC = () => {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-3">
-            {navLinks.map(({ to, label }) => {
-              const isActive = location.pathname === to;
-              return (
-                <Link
-                  key={to}
-                  to={to}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                    ${
-                      isActive
-                        ? 'bg-primary text-white shadow-sm'
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-primary'
-                    }`}
-                >
-                  {label}
-                </Link>
-              );
-            })}
+            {navLinks.map(({ to, label }) => (
+              <Link
+                key={to}
+                to={to}
+                className={`px-4 py-2 rounded-lg ${
+                  location.pathname === to ? 'bg-green-600 text-white' : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {label}
+              </Link>
+            ))}
           </div>
 
           {/* Mobile Menu Toggle */}
           <div className="md:hidden">
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="p-2 text-gray-600 hover:text-green-600 focus:outline-none"
+              className="p-2 text-gray-600 hover:text-green-600"
             >
               {showMobileMenu ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
 
           {/* Profile Icon */}
-          <div className="hidden md:flex items-center relative" ref={menuRef}>
-            <button
-              onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="ml-4 h-8 w-8 rounded-full bg-green-100 text-green-600 font-semibold flex items-center justify-center"
-            >
-              {user?.email?.[0].toUpperCase() || 'U'}
-            </button>
+          <div className="hidden md:flex items-center">
+            <Popover className="relative">
+              {({ open }) => (
+                <>
+                  <Popover.Button
+                    className="ml-4 h-8 w-8 rounded-full bg-green-100 text-green-600 font-semibold flex items-center justify-center hover:bg-green-200 transition-colors duration-150 focus:outline-none"
+                  >
+                    {user?.email?.[0].toUpperCase() || 'U'}
+                  </Popover.Button>
 
-            {showProfileMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                <div className="px-4 py-2 border-b border-gray-100">
-                  <p className="text-sm text-gray-500">{user?.email}</p>
-                </div>
-                <Link
-                  to="/recipe-generator"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  onClick={() => setShowProfileMenu(false)}
-                >
-                  Generate Recipe
-                </Link>
-                <Link
-                  to="/recipe-test"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  onClick={() => setShowProfileMenu(false)}
-                >
-                  Test Recipe Generator
-                </Link>
-                <Link
-                  to="/saved-plans"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  onClick={() => setShowProfileMenu(false)}
-                >
-                  Saved Plans
-                </Link>
-                <Link
-                  to="/profile"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  onClick={() => setShowProfileMenu(false)}
-                >
-                  Profile Settings
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  Sign Out
-                </button>
-              </div>
-            )}
+                  <Popover.Panel className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-100">
+                    <div className="px-4 py-1.5 border-b border-gray-100">
+                      <p className="text-sm font-medium text-gray-900">{user?.email}</p>
+                    </div>
+                    <div className="divide-y divide-gray-100">
+                      <button
+                        onClick={() => {
+                          navigate('/recipe-generator');
+                        }}
+                        className="w-full px-4 py-3.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors duration-150 flex items-center"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Generate Recipe
+                      </button>
+                      <button
+                        onClick={() => {
+                          navigate('/recipe-test');
+                        }}
+                        className="w-full px-4 py-3.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors duration-150 flex items-center"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        Test Recipe Generator
+                      </button>
+                      <button
+                        onClick={() => {
+                          navigate('/saved-plans');
+                        }}
+                        className="w-full px-4 py-3.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors duration-150 flex items-center"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                        </svg>
+                        Saved Plans
+                      </button>
+                      <button
+                        onClick={() => {
+                          navigate('/profile');
+                        }}
+                        className="w-full px-4 py-3.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors duration-150 flex items-center"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        Profile Settings
+                      </button>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full px-4 py-3.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600 transition-colors duration-150 flex items-center"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Sign Out
+                      </button>
+                    </div>
+                  </Popover.Panel>
+                </>
+              )}
+            </Popover>
           </div>
         </div>
 
@@ -152,45 +143,24 @@ const Navbar: React.FC = () => {
         {showMobileMenu && (
           <div className="md:hidden mt-2 border-t border-gray-100 pt-4">
             <div className="space-y-2 pb-4">
-              <Link
-                to="/"
-                className="block px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-md"
-                onClick={() => setShowMobileMenu(false)}
-              >
-                Home
-              </Link>
-              <Link
-                to="/saved-plans"
-                className="block px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-md"
-                onClick={() => setShowMobileMenu(false)}
-              >
-                Saved Plans
-              </Link>
-              <Link
-                to="/about"
-                className="block px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-md"
-                onClick={() => setShowMobileMenu(false)}
-              >
-                About
-              </Link>
+              {navLinks.map(({ to, label }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  onClick={() => setShowMobileMenu(false)}
+                  className="block px-4 py-2 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  {label}
+                </Link>
+              ))}
               <button
-                onClick={handleOpenFeedback}
-                className="w-full text-left px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-md"
+                onClick={() => {
+                  setShowMobileMenu(false);
+                  setShowFeedbackModal(true);
+                }}
+                className="block w-full text-left px-4 py-2 rounded-md text-gray-700 hover:bg-gray-50"
               >
                 Send Feedback
-              </button>
-              <Link
-                to="/profile"
-                className="block px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-md"
-                onClick={() => setShowMobileMenu(false)}
-              >
-                Profile Settings
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="w-full text-left px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-md"
-              >
-                Sign Out
               </button>
             </div>
           </div>

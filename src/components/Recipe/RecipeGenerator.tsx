@@ -40,7 +40,7 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
       }
       
       if (!session) {
-        throw new Error('Not authenticated');
+        throw new Error('Please log in to generate recipes');
       }
 
       console.log('Session:', session);
@@ -55,10 +55,16 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${session.access_token}`,
             'apikey': process.env.REACT_APP_SUPABASE_ANON_KEY || '',
-            'x-client-info': 'preppal-web'
+            'x-client-info': 'supabase-js/2.0.0'
           },
-          body: JSON.stringify(formData),
-          credentials: 'include'
+          credentials: 'include',
+          body: JSON.stringify({
+            mood: formData.mood,
+            dietaryPreferences: formData.dietaryPreferences,
+            ingredients: formData.ingredients,
+            cookingTime: formData.cookingTime,
+            difficultyLevel: formData.difficulty
+          })
         }
       );
 
@@ -72,7 +78,7 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
       }
 
       const recipe = await response.json();
-      onRecipeGenerated(recipe);
+      onRecipeGenerated(recipe.recipe);
     } catch (err) {
       console.error('Detailed error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -103,6 +109,7 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
             placeholder="e.g., energetic, cozy, adventurous"
             className="input"
             required
+            disabled={loading}
           />
         </div>
 
@@ -118,6 +125,7 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
             onChange={handleChange}
             placeholder="e.g., vegetarian, gluten-free, low-carb"
             className="input"
+            disabled={loading}
           />
         </div>
 
@@ -132,6 +140,7 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
             onChange={handleChange}
             placeholder="List ingredients you have on hand"
             className="input h-24"
+            disabled={loading}
           />
         </div>
 
@@ -146,6 +155,7 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
             onChange={handleChange}
             className="input"
             required
+            disabled={loading}
           >
             <option value="">Select time</option>
             <option value="15">15 minutes</option>
@@ -167,6 +177,7 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
             value={formData.difficulty}
             onChange={handleChange}
             className="input"
+            disabled={loading}
           >
             <option value="any">Any</option>
             <option value="easy">Easy</option>
@@ -180,7 +191,17 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
           className={`w-full btn btn-primary ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
           disabled={loading}
         >
-          {loading ? 'Generating Recipe...' : 'Generate Recipe'}
+          {loading ? (
+            <div className="flex items-center justify-center">
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Generating Recipe...
+            </div>
+          ) : (
+            'Generate Recipe'
+          )}
         </button>
       </form>
     </div>

@@ -11,6 +11,8 @@ import AboutPage from './pages/AboutPage';
 import ProfilePage from './pages/ProfilePage';
 import { EmailVerification } from './components/Auth/EmailVerification';
 import { PasswordReset } from './components/Auth/PasswordReset';
+import RecipePage from './pages/RecipePage';
+import RecipeTest from './components/Recipe/RecipeTest';
 import './App.css';
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -146,6 +148,8 @@ const App: React.FC = () => {
               </AppLayout>
             }
           />
+          <Route path="/recipe-generator" element={<RecipePage />} />
+          <Route path="/recipe-test" element={<RecipeTest />} />
         </Routes>
       </Router>
     </AuthProvider>

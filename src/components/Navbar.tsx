@@ -105,7 +105,31 @@ const Navbar: React.FC = () => {
             </button>
 
             {showProfileMenu && (
-              <div className="absolute right-0 mt-10 w-48 bg-white rounded-md shadow-lg py-2 z-50 animate-fade-in">
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                <div className="px-4 py-2 border-b border-gray-100">
+                  <p className="text-sm text-gray-500">{user?.email}</p>
+                </div>
+                <Link
+                  to="/recipe-generator"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  onClick={() => setShowProfileMenu(false)}
+                >
+                  Generate Recipe
+                </Link>
+                <Link
+                  to="/recipe-test"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  onClick={() => setShowProfileMenu(false)}
+                >
+                  Test Recipe Generator
+                </Link>
+                <Link
+                  to="/saved-plans"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  onClick={() => setShowProfileMenu(false)}
+                >
+                  Saved Plans
+                </Link>
                 <Link
                   to="/profile"
                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

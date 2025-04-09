@@ -19,61 +19,26 @@ const allowedOrigins = [
   'https://localhost:3000'
 ];
 
-// Function to parse recipe text into structured format
-const parseRecipe = (text: string) => {
-  const lines = text.split('\n');
-  const recipe: any = {
-    title: '',
-    ingredients: [],
-    instructions: [],
-    prepTime: 'Not specified',
-    cookTime: 'Not specified',
-    servings: 'Not specified',
-    difficulty: 'Not specified',
-    notes: []
-  };
-
-  let currentSection = '';
-  
-  for (const line of lines) {
-    const trimmedLine = line.trim();
-    if (!trimmedLine) continue;
-
-    if (trimmedLine.toLowerCase().includes('recipe name:')) {
-      recipe.title = trimmedLine.split(':')[1].trim();
-    } else if (trimmedLine.toLowerCase().includes('ingredients:')) {
-      currentSection = 'ingredients';
-    } else if (trimmedLine.toLowerCase().includes('instructions:')) {
-      currentSection = 'instructions';
-    } else if (trimmedLine.toLowerCase().includes('estimated cooking time:')) {
-      recipe.cookTime = trimmedLine.split(':')[1].trim();
-    } else if (trimmedLine.toLowerCase().includes('difficulty level:')) {
-      recipe.difficulty = trimmedLine.split(':')[1].trim();
-    } else if (trimmedLine.toLowerCase().includes('special notes:')) {
-      currentSection = 'notes';
-    } else if (currentSection === 'ingredients' && trimmedLine.startsWith('-')) {
-      recipe.ingredients.push(trimmedLine.substring(1).trim());
-    } else if (currentSection === 'instructions' && trimmedLine.match(/^[a-z]\./)) {
-      recipe.instructions.push(trimmedLine.substring(2).trim());
-    } else if (currentSection === 'notes' && trimmedLine.startsWith('-')) {
-      recipe.notes.push(trimmedLine.substring(1).trim());
-    }
+// Helper function to extract JSON from a string
+function extractJson(str: string): object | null {
+  const match = str.match(/\{.*\}/s);
+  if (!match) {
+    return null;
   }
-
-  return recipe;
-};
+  try {
+    return JSON.parse(match[0]);
+  } catch (e) {
+    console.error("Failed to parse extracted JSON string:", e);
+    return null;
+  }
+}
 
 serve(async (req) => {
-  // Get the origin from the request
+  // --- CORS Handling ---
   const origin = req.headers.get('origin') || '';
-  
-  // Check if the origin is allowed
   const isAllowedOrigin = allowedOrigins.includes(origin);
-  
-  // Use the origin if it's allowed, otherwise use the first allowed origin
   const corsHeaders = getCorsHeaders(isAllowedOrigin ? origin : allowedOrigins[0]);
 
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
@@ -81,107 +46,201 @@ serve(async (req) => {
     });
   }
 
+  // --- Request Body Processing ---
+  let requestData;
   try {
-    const { mood, dietaryPreferences, ingredients, cookingTime, difficultyLevel } = await req.json();
-
-    // Initialize OpenAI client
-    const openai = new OpenAI({
-      apiKey: Deno.env.get('OPENAI_API_KEY'),
+    requestData = await req.json();
+  } catch (e) {
+    console.error("Failed to parse request body:", e);
+    return new Response(JSON.stringify({ error: "Invalid request body. Expected JSON." }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
+  }
 
-    // Create the prompt for recipe generation
-    const prompt = `Generate a recipe based on the following preferences:
-    - Mood: ${mood || 'Not specified'}
-    - Dietary Preferences: ${dietaryPreferences || 'None specified'}
-    - Available Ingredients: ${ingredients || 'Not specified'}
-    - Cooking Time: ${cookingTime || 'Not specified'} minutes
-    - Difficulty Level: ${difficultyLevel || 'Not specified'}
+  const { 
+    mood = "any", 
+    dietaryPreferences = "none", 
+    ingredients = "any", 
+    cookingTime = "any", // Changed default slightly
+    difficultyLevel = "any",
+    proteinGoal = "", // New field
+    calorieGoal = "", // New field
+    totalServings = "2" // New field
+  } = requestData || {};
 
-    Please provide a detailed recipe in the following format:
+  // --- Input Validation ---
+  let validatedCookingTime = cookingTime;
+  if (typeof cookingTime !== 'string' || cookingTime.toLowerCase() === 'any' || !/\d+/.test(cookingTime)) {
+    validatedCookingTime = "any"; // Treat invalid/any as unspecified for the prompt
+  } 
 
-    Recipe Name: [Recipe Name]
+  let validatedTotalServings = totalServings;
+  if (typeof totalServings !== 'string' || !/\d+/.test(totalServings) || parseInt(totalServings) < 1) {
+      console.warn("Invalid totalServings provided, defaulting to 2:", totalServings);
+      validatedTotalServings = "2"; // Default if invalid
+  }
 
-    Ingredients:
-    - [Ingredient 1]
-    - [Ingredient 2]
-    ...
+  let validatedProteinGoal = proteinGoal;
+  if (typeof proteinGoal !== 'string' || (proteinGoal && !/\d+/.test(proteinGoal))) {
+      console.warn("Invalid proteinGoal provided, ignoring:", proteinGoal);
+      validatedProteinGoal = ""; // Ignore if invalid
+  }
 
-    Instructions:
-    a. [Step 1]
-    b. [Step 2]
-    ...
+  let validatedCalorieGoal = calorieGoal;
+  if (typeof calorieGoal !== 'string' || (calorieGoal && !/\d+/.test(calorieGoal))) {
+      console.warn("Invalid calorieGoal provided, ignoring:", calorieGoal);
+      validatedCalorieGoal = ""; // Ignore if invalid
+  }
 
-    Estimated Cooking Time: [Time]
+  try {
+    // --- OpenAI Initialization ---
+    const apiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!apiKey) {
+      throw new Error("Missing OPENAI_API_KEY environment variable.")
+    }
+    const openai = new OpenAI({ apiKey });
 
-    Difficulty Level: [Level]
+    // --- Prompt Construction ---
+    // Build constraints string based on provided goals
+    let constraints = ``;
+    if (validatedCookingTime !== "any") {
+      constraints += `Maximum Cooking Time: ${validatedCookingTime} minutes\n`;
+    }
+    if (validatedProteinGoal) {
+      constraints += `Target Protein per Serving: approximately ${validatedProteinGoal}g\n`;
+    }
+    if (validatedCalorieGoal) {
+      constraints += `Target Calories per Serving: approximately ${validatedCalorieGoal} kcal\n`;
+    }
+    constraints += `Total Servings to Generate: ${validatedTotalServings}\n`;
 
-    Special Notes:
-    - [Note 1]
-    - [Note 2]
-    ...`;
+    const prompt = `You are an expert chef and recipe creator. Your task is to find or create a recipe based on the following user inputs and constraints:
 
-    // Generate recipe using OpenAI
+User Inputs:
+Mood: ${mood}
+Dietary Preferences: ${dietaryPreferences}
+Available Ingredients: ${ingredients}
+Preferred Difficulty Level: ${difficultyLevel}
+
+Constraints:
+${constraints}
+First, search the internet for existing recipes that closely match the user inputs and constraints. If you find a suitable recipe, adapt it to meet all requirements precisely. If no suitable recipe is found, create a new one from scratch that meets all criteria.
+
+The generated recipe MUST adhere strictly to the specified constraints, especially cooking time, protein/calorie goals (if provided), and total servings.
+
+Provide the recipe details formatted strictly as a single JSON object with the following structure:
+{
+  "title": "Recipe Title",
+  "description": "Recipe description",
+  "ingredients": ["quantity ingredient 1", "quantity ingredient 2", ...], // Include quantities
+  "instructions": ["step 1", "step 2", ...],
+  "cooking_time": number, // Estimated cooking time in minutes (must be <= Maximum Cooking Time if specified)
+  "difficulty": "easy/medium/hard",
+  "servings": number, // Must match the 'Total Servings to Generate' constraint
+  "source": "URL or 'Original Recipe'",
+  "modifications": ["modification 1", "modification 2", ...], // Explain adaptations if source is not 'Original Recipe'
+  "nutritional_info": { // Provide estimates per serving
+    "calories": number | null, // (must be approx. Target Calories if specified)
+    "protein": number | null, // (must be approx. Target Protein if specified)
+    "carbs": number | null,
+    "fat": number | null
+  }
+}
+Ensure the output is ONLY the JSON object, with no additional text before or after. Ensure all string values within the JSON are properly escaped. Calculate nutritional info based on the specified total servings.`;
+
+    // --- OpenAI API Call ---
+    console.log("Sending request to OpenAI with prompt:", prompt);
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o", // Using a more advanced model might help adhere to constraints
+      response_format: { type: "json_object" }, 
       messages: [
         {
           role: "system",
-          content: "You are a professional chef and recipe generator. Create detailed, easy-to-follow recipes. Always format the recipe exactly as specified in the prompt."
+          content: "You are a helpful recipe assistant designed to output JSON. Strictly follow the requested JSON format and all constraints mentioned in the user prompt. Output ONLY the JSON object."
         },
         {
           role: "user",
           content: prompt
         }
       ],
-      temperature: 0.7,
-      max_tokens: 1000
+      temperature: 0.6, // Slightly lower temperature for more predictable adherence
+      max_tokens: 2000 // Increased slightly more for potentially complex recipes/calculations
     });
+    console.log("Received response from OpenAI.");
 
     const recipeText = completion.choices[0].message?.content;
 
     if (!recipeText) {
-      throw new Error('Failed to generate recipe');
+      console.error("OpenAI response content is empty.");
+      throw new Error('Failed to generate recipe content from OpenAI');
     }
 
-    // Parse the recipe text into a structured format
-    const recipe = parseRecipe(recipeText);
+    console.log("Raw OpenAI Response Text:", recipeText);
 
-    return new Response(JSON.stringify({ recipe }), {
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/json'
+    // --- Parse OpenAI Response ---
+    let recipeData;
+    try {
+      // Attempt direct parsing first
+      recipeData = JSON.parse(recipeText);
+    } catch (directParseError) {
+      console.warn("Direct JSON parsing failed. Attempting to extract JSON block.", directParseError);
+      // If direct parse fails, try extracting JSON block
+      recipeData = extractJson(recipeText);
+      if (!recipeData) {
+          console.error("Failed to parse or extract JSON from OpenAI response:", recipeText);
+          throw new Error('Failed to parse recipe data from AI. The format might be incorrect or incomplete.');
       }
+      console.log("Successfully extracted JSON after direct parse failed.");
+    }
+
+    // --- Validate Parsed Data (Basic Example) ---
+    if (!recipeData || typeof recipeData !== 'object' || !recipeData.title || !Array.isArray(recipeData.ingredients) || !Array.isArray(recipeData.instructions) || typeof recipeData.servings !== 'number') {
+        console.error("Parsed JSON data is missing required fields or has incorrect types:", recipeData);
+        throw new Error('Parsed recipe data is incomplete or invalid.');
+    }
+
+    console.log("Successfully Parsed Recipe Data:", recipeData);
+
+    // --- Send Success Response ---
+    return new Response(JSON.stringify({ recipe: recipeData }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200
     });
 
+  // --- General Error Handling ---
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Edge Function Execution Error:', error);
     
-    // Handle OpenAI quota errors specifically
-    if (error.response?.status === 429) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'OpenAI quota exceeded. Please try again later or contact support.' 
-        }), 
-        { 
-          status: 429,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json'
-          }
+    let errorMessage = 'An error occurred while generating the recipe';
+    let statusCode = 500;
+
+    if (error instanceof Error) {
+        errorMessage = error.message;
+        // Check for specific error types if needed
+        if (error.message.includes("OPENAI_API_KEY")) {
+             statusCode = 500; // Internal configuration error
+        } else if (error.message.includes("quota")) { // Simplified quota check
+             errorMessage = 'OpenAI quota exceeded. Please try again later.';
+             statusCode = 429;
+        } else if (error.message.includes("parse recipe data")) {
+             statusCode = 500; // Indicate internal failure to process AI response
+        } else if (error.message.includes("Parsed recipe data is incomplete")) {
+             statusCode = 500; // Indicate internal failure after parsing
         }
-      );
     }
+     
+    // Handle potential OpenAI API errors passed directly
+    if (error.response?.status === 429) { 
+        errorMessage = 'OpenAI quota exceeded. Please try again later.';
+        statusCode = 429;
+    } // Add other OpenAI status checks if needed (e.g., 401 for auth)
 
     return new Response(
-      JSON.stringify({ 
-        error: error.message || 'An error occurred while generating the recipe' 
-      }), 
+      JSON.stringify({ error: errorMessage }), 
       { 
-        status: 500,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        }
+        status: statusCode,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
   }

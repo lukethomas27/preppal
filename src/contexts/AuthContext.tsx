@@ -1,15 +1,20 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-  signUp: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  error: string | null;
+  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resendVerificationEmail: (email: string) => Promise<{ error: AuthError | null }>;
-  resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
+  updatePassword: (token: string, password: string) => Promise<{ error: any }>;
+  verifyEmail: (token: string) => Promise<{ error: any }>;
+  clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -17,6 +22,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     // Check active sessions and sets the user
@@ -37,53 +45,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error };
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      return { error };
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to sign in');
+      return { error: err };
+    }
   };
 
   const signUp = async (email: string, password: string) => {
     try {
-      console.log('Attempting signup with:', { email });
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/login`,
-          data: {
-            full_name: email.split('@')[0],
-            avatar_url: null,
-          },
-        },
-      });
-
-      if (signUpError) {
-        console.error('Signup error details:', {
-          message: signUpError.message,
-          status: signUpError.status,
-          name: signUpError.name,
-        });
-        return { error: signUpError };
-      }
-
-      if (data?.user) {
-        console.log('Signup successful:', {
-          userId: data.user.id,
-          email: data.user.email,
-        });
-      } else {
-        console.log('Signup successful but no user data returned');
-      }
-
-      return { error: null };
-    } catch (error) {
-      console.error('Unexpected error during signup:', error);
-      return { error: { message: 'An unexpected error occurred during signup' } as AuthError };
+      const { error } = await supabase.auth.signUp({ email, password });
+      return { error };
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to sign up');
+      return { error: err };
     }
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to sign out');
+    }
   };
 
   const resendVerificationEmail = async (email: string) => {
@@ -110,30 +96,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetPassword = async (email: string) => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-
-      if (error) {
-        console.error('Password reset error:', error);
-        return { error };
-      }
-
-      return { error: null };
-    } catch (error) {
-      console.error('Unexpected error during password reset:', error);
-      return { error: { message: 'An unexpected error occurred' } as AuthError };
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      return { error };
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to reset password');
+      return { error: err };
     }
   };
+
+  const updatePassword = async (token: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      return { error };
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update password');
+      return { error: err };
+    }
+  };
+
+  const verifyEmail = async (token: string) => {
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        token,
+        type: 'email',
+        email: user?.email || '',
+      });
+      return { error };
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to verify email');
+      return { error: err };
+    }
+  };
+
+  const clearError = () => setError(null);
 
   const value = {
     user,
     loading,
+    error,
     signIn,
     signUp,
     signOut,
     resendVerificationEmail,
     resetPassword,
+    updatePassword,
+    verifyEmail,
+    clearError,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

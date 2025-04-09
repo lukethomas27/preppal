@@ -20,7 +20,7 @@ const RecipeTest: React.FC = () => {
       }
 
       const baseUrl = process.env.REACT_APP_SUPABASE_URL;
-      const functionUrl = `${baseUrl}/functions/v1/generate-recipe`;
+      const functionUrl = `${baseUrl}/functions/generate-recipe`;
       
       console.log('Base URL:', baseUrl);
       console.log('Function URL:', functionUrl);

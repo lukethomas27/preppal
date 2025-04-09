@@ -10,7 +10,7 @@ const AboutUs: React.FC = () => {
         <p className="text-gray-600 mb-4">
           At PrepPal, we're on a mission to simplify meal planning and preparation for everyone. We
           believe that eating well shouldn't be complicated or time-consuming. Our AI-powered
-          platform takes the stress out of meal prep by generating personalized meal plans that fit
+          platform takes the stress out of meal prep by finding personalized meal plans that fit
           your dietary preferences, time constraints, and cooking skill level.
         </p>
         <p className="text-gray-600">

@@ -8,6 +8,7 @@ module.exports = {
     extend: {
       colors: {
         primary: {
+          DEFAULT: '#0284c7',
           50: '#f0f9ff',
           100: '#e0f2fe',
           200: '#bae6fd',
@@ -19,6 +20,21 @@ module.exports = {
           800: '#075985',
           900: '#0c4a6e',
         },
+      },
+      fontFamily: {
+        sans: [
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'Roboto',
+          'Oxygen',
+          'Ubuntu',
+          'Cantarell',
+          'Fira Sans',
+          'Droid Sans',
+          'Helvetica Neue',
+          'sans-serif',
+        ],
       },
     },
   },

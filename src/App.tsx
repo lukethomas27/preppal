@@ -1,158 +1,69 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import LoginForm from './components/Auth/LoginForm';
-import SignupForm from './components/Auth/SignupForm';
-import MealPlanningForm from './components/MealPlanningForm';
-import SavedMealPlans from './components/SavedMealPlans';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import AboutPage from './pages/AboutPage';
-import ProfilePage from './pages/ProfilePage';
-import { EmailVerification } from './components/Auth/EmailVerification';
-import { PasswordReset } from './components/Auth/PasswordReset';
-import RecipePage from './pages/RecipePage';
-import RecipeTest from './components/Recipe/RecipeTest';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/Auth/ProtectedRoute';
+import Layout from './components/Layout';
+import LandingPage from './components/LandingPage';
+import Login from './components/Auth/Login';
+import Signup from './components/Auth/Signup';
+import RecipeGenerator from './components/Recipe/RecipeGenerator';
+import RecipeDisplay from './components/Recipe/RecipeDisplay';
+import MealPlanner from './components/MealPlanner/MealPlanner';
+import Profile from './components/Profile/Profile';
+import SavedRecipes from './components/Recipe/SavedRecipes';
+import ForgotPassword from './components/Auth/ForgotPassword';
+import ResetPassword from './components/Auth/ResetPassword';
+import VerifyEmail from './components/Auth/VerifyEmail';
+import Dashboard from './components/Dashboard';
 import './App.css';
-
-const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-gray-600">Loading...</div>
-      </div>
-    );
-  }
-
-  return user ? <>{children}</> : <Navigate to="/login" />;
-};
-
-const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-gray-600">Loading...</div>
-      </div>
-    );
-  }
-
-  if (user) {
-    return <Navigate to="/" />;
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col w-full">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-grow">
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-3">
-            <img src="/preppal-logo.png" alt="PrepPal Logo" className="h-20 w-auto" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900">PrepPal</h1>
-          <p className="mt-2 text-lg text-gray-600">Your AI-Powered Meal Prep Assistant</p>
-        </div>
-        <div className="flex justify-center w-full">{children}</div>
-      </div>
-      <Footer />
-    </div>
-  );
-};
-
-const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col w-full">
-      <Navbar />
-      <main className="w-full flex-grow">
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">{children}</div>
-      </main>
-      <Footer />
-    </div>
-  );
-};
+import { useAuth } from './contexts/AuthContext';
 
 const App: React.FC = () => {
+  const [generatedRecipe, setGeneratedRecipe] = useState<any>(null);
+
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
+      <AuthProvider>
         <Routes>
-          <Route
-            path="/login"
+          {/* Public Routes */}
+          <Route path="/" element={<Layout><LandingPage /></Layout>} />
+          <Route path="/login" element={<ProtectedRoute requireAuth={false}><Layout><Login /></Layout></ProtectedRoute>} />
+          <Route path="/signup" element={<ProtectedRoute requireAuth={false}><Layout><Signup /></Layout></ProtectedRoute>} />
+          <Route path="/forgot-password" element={<ProtectedRoute requireAuth={false}><Layout><ForgotPassword /></Layout></ProtectedRoute>} />
+          <Route path="/reset-password" element={<ProtectedRoute requireAuth={false}><Layout><ResetPassword /></Layout></ProtectedRoute>} />
+          <Route path="/verify-email" element={<ProtectedRoute requireAuth={false}><Layout><VerifyEmail /></Layout></ProtectedRoute>} />
+
+          {/* Protected Routes */}
+          <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
+          <Route 
+            path="/recipe-generator" 
             element={
-              <AuthLayout>
-                <LoginForm />
-              </AuthLayout>
-            }
+              <ProtectedRoute>
+                <Layout>
+                  <RecipeGenerator onRecipeGenerated={setGeneratedRecipe} />
+                </Layout>
+              </ProtectedRoute>
+            } 
           />
-          <Route
-            path="/signup"
+          <Route 
+            path="/recipe" 
             element={
-              <AuthLayout>
-                <SignupForm />
-              </AuthLayout>
-            }
+              <ProtectedRoute>
+                <Layout>
+                  {generatedRecipe ? <RecipeDisplay recipe={generatedRecipe} /> : <Navigate to="/recipe-generator" />}
+                </Layout>
+              </ProtectedRoute>
+            } 
           />
-          <Route
-            path="/verify"
-            element={
-              <AuthLayout>
-                <EmailVerification />
-              </AuthLayout>
-            }
-          />
-          <Route
-            path="/reset-password"
-            element={
-              <AuthLayout>
-                <PasswordReset />
-              </AuthLayout>
-            }
-          />
-          <Route
-            path="/"
-            element={
-              <PrivateRoute>
-                <AppLayout>
-                  <MealPlanningForm />
-                </AppLayout>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/saved-plans"
-            element={
-              <PrivateRoute>
-                <AppLayout>
-                  <SavedMealPlans />
-                </AppLayout>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <PrivateRoute>
-                <AppLayout>
-                  <ProfilePage />
-                </AppLayout>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/about"
-            element={
-              <AppLayout>
-                <AboutPage />
-              </AppLayout>
-            }
-          />
-          <Route path="/recipe-generator" element={<RecipePage />} />
-          <Route path="/recipe-test" element={<RecipeTest />} />
+          <Route path="/meal-planner" element={<ProtectedRoute><Layout><MealPlanner /></Layout></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
+          <Route path="/saved-recipes" element={<ProtectedRoute><Layout><SavedRecipes /></Layout></ProtectedRoute>} />
+
+          {/* 404 Route */}
+          <Route path="*" element={<Layout><div className="min-h-screen flex items-center justify-center">Page not found</div></Layout>} />
         </Routes>
-      </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </Router>
   );
 };
 

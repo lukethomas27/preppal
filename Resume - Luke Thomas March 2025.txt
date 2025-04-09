@@ -1,0 +1,35 @@
+Luke Thomas
+Edmonton, Alberta • (778) 587-6804 • luke5@ualberta.ca
+github.com/lukethomas27 • linkedin.com/in/lukethomas
+________________________________________
+EDUCATION
+Bachelor of Science in Computing Science, Software Practice (BSc) – Expected April 2026
+University of Alberta, Edmonton, Alberta
+________________________________________
+PROFESSIONAL EXPERIENCE
+Full-Stack Software Developer Co-op | Siteability (Remote) | January 2025 – Present
+•	Developed and maintained responsive, user-centric web applications using NUXT 3, enhancing UX and performance for municipal and homeowner platforms.
+•	Integrated Supabase for scalable, real-time database management, significantly improving authentication and data synchronization.
+•	Led feature development as part of Agile sprints, collaborating with cross-functional teams to deliver high-quality features on time.
+•	Contributed to the full product lifecycle, directly impacting the creation of new software solutions for government and residential use.
+
+General Relief / Machine Operator | Island Farms – Agropur Cooperative | May 2023 – August 2024
+•	Collaborated with team members to meet daily production quotas, ensuring on-time product delivery.
+•	Enforced stringent quality control measures, reducing defects and ensuring product consistency.
+________________________________________
+PROJECTS
+Meal Prep Pal | January 2024 – Present
+•	Developed a full-stack web application using React, TypeScript, and Supabase for AI-powered meal planning and recipe generation.
+•	Implemented OpenAI integration for intelligent recipe generation and modification based on user preferences and dietary requirements.
+•	Created a responsive UI with Tailwind CSS, featuring multi-step forms, animated transitions, and real-time updates.
+•	Built secure authentication system with email verification, password reset, and protected routes.
+•	Designed and implemented database schema for user data and saved recipes using Supabase.
+•	Developed edge functions for AI-powered recipe generation and modification, handling complex user requests.
+•	Integrated real-time updates and state management using React Context for seamless user experience.
+•	Implemented comprehensive error handling and user feedback systems for improved reliability.
+________________________________________
+TECHNICAL SKILLS
+•	Programming Languages: C, C++, Java, JavaScript, TypeScript, Python, Bash, Assembly, HTML, CSS
+•	Technologies/Tools: NUXT 3, React, Tailwind CSS, Git, Postgres, NoSQL, Supabase, OpenAI API
+•	Development Practices: Agile Methodologies, Version Control, Test-Driven Development (TDD), Edge Computing
+•	AI/ML: Natural Language Processing, AI Integration, Recipe Generation Systems 

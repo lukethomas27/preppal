@@ -62,38 +62,70 @@ serve(async (req) => {
     mood = "any", 
     dietaryPreferences = "none", 
     ingredients = "any", 
-    cookingTime = "any", // Changed default slightly
+    cookingTime = "any",
     difficultyLevel = "any",
-    proteinGoal = "", // New field
-    calorieGoal = "", // New field
-    totalServings = "2" // New field
+    proteinGoal = "",
+    calorieGoal = "",
+    totalServings = "2"
   } = requestData || {};
 
   // --- Input Validation ---
   let validatedCookingTime = cookingTime;
   if (typeof cookingTime !== 'string' || cookingTime.toLowerCase() === 'any' || !/\d+/.test(cookingTime)) {
-    validatedCookingTime = "any"; // Treat invalid/any as unspecified for the prompt
+    validatedCookingTime = "any";
   } 
 
   let validatedTotalServings = totalServings;
   if (typeof totalServings !== 'string' || !/\d+/.test(totalServings) || parseInt(totalServings) < 1) {
-      console.warn("Invalid totalServings provided, defaulting to 2:", totalServings);
-      validatedTotalServings = "2"; // Default if invalid
+    validatedTotalServings = "2";
   }
 
   let validatedProteinGoal = proteinGoal;
   if (typeof proteinGoal !== 'string' || (proteinGoal && !/\d+/.test(proteinGoal))) {
-      console.warn("Invalid proteinGoal provided, ignoring:", proteinGoal);
-      validatedProteinGoal = ""; // Ignore if invalid
+    validatedProteinGoal = "";
   }
 
   let validatedCalorieGoal = calorieGoal;
   if (typeof calorieGoal !== 'string' || (calorieGoal && !/\d+/.test(calorieGoal))) {
-      console.warn("Invalid calorieGoal provided, ignoring:", calorieGoal);
-      validatedCalorieGoal = ""; // Ignore if invalid
+    validatedCalorieGoal = "";
   }
 
   try {
+    // --- Rate Limiting Check ---
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: { Authorization: req.headers.get('Authorization') ?? '' },
+        },
+      }
+    );
+
+    // Get the IP address from the request
+    const ip = req.headers.get('x-forwarded-for') || 'unknown';
+    
+    // Check rate limit
+    const { data: rateLimitCheck, error: rateLimitError } = await supabaseClient
+      .rpc('check_recipe_generation_limit', { ip });
+
+    if (rateLimitError) {
+      console.error("Rate limit check error:", rateLimitError);
+      throw new Error("Failed to check rate limit");
+    }
+
+    if (!rateLimitCheck) {
+      return new Response(
+        JSON.stringify({ 
+          error: "You've reached your weekly limit of 5 recipe generations. Please create an account for unlimited access." 
+        }),
+        { 
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     // --- OpenAI Initialization ---
     const apiKey = Deno.env.get('OPENAI_API_KEY');
     if (!apiKey) {
@@ -102,7 +134,6 @@ serve(async (req) => {
     const openai = new OpenAI({ apiKey });
 
     // --- Prompt Construction ---
-    // Build constraints string based on provided goals
     let constraints = ``;
     if (validatedCookingTime !== "any") {
       constraints += `Maximum Cooking Time: ${validatedCookingTime} minutes\n`;
@@ -152,8 +183,8 @@ Ensure the output is ONLY the JSON object, with no additional text before or aft
     // --- OpenAI API Call ---
     console.log("Sending request to OpenAI with prompt:", prompt);
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o", // Using a more advanced model might help adhere to constraints
-      response_format: { type: "json_object" }, 
+      model: "gpt-4-turbo-preview",
+      response_format: { type: "json_object" },
       messages: [
         {
           role: "system",
@@ -164,8 +195,8 @@ Ensure the output is ONLY the JSON object, with no additional text before or aft
           content: prompt
         }
       ],
-      temperature: 0.6, // Slightly lower temperature for more predictable adherence
-      max_tokens: 2000 // Increased slightly more for potentially complex recipes/calculations
+      temperature: 0.6,
+      max_tokens: 2000
     });
     console.log("Received response from OpenAI.");
 
@@ -181,26 +212,32 @@ Ensure the output is ONLY the JSON object, with no additional text before or aft
     // --- Parse OpenAI Response ---
     let recipeData;
     try {
-      // Attempt direct parsing first
       recipeData = JSON.parse(recipeText);
     } catch (directParseError) {
       console.warn("Direct JSON parsing failed. Attempting to extract JSON block.", directParseError);
-      // If direct parse fails, try extracting JSON block
       recipeData = extractJson(recipeText);
       if (!recipeData) {
-          console.error("Failed to parse or extract JSON from OpenAI response:", recipeText);
-          throw new Error('Failed to parse recipe data from AI. The format might be incorrect or incomplete.');
+        console.error("Failed to parse or extract JSON from OpenAI response:", recipeText);
+        throw new Error('Failed to parse recipe data from AI. The format might be incorrect or incomplete.');
       }
       console.log("Successfully extracted JSON after direct parse failed.");
     }
 
-    // --- Validate Parsed Data (Basic Example) ---
+    // --- Validate Parsed Data ---
     if (!recipeData || typeof recipeData !== 'object' || !recipeData.title || !Array.isArray(recipeData.ingredients) || !Array.isArray(recipeData.instructions) || typeof recipeData.servings !== 'number') {
-        console.error("Parsed JSON data is missing required fields or has incorrect types:", recipeData);
-        throw new Error('Parsed recipe data is incomplete or invalid.');
+      console.error("Parsed JSON data is missing required fields or has incorrect types:", recipeData);
+      throw new Error('Parsed recipe data is incomplete or invalid.');
     }
 
     console.log("Successfully Parsed Recipe Data:", recipeData);
+
+    // --- Record the attempt ---
+    const { error: recordError } = await supabaseClient
+      .rpc('record_recipe_generation_attempt', { ip });
+
+    if (recordError) {
+      console.error("Failed to record attempt:", recordError);
+    }
 
     // --- Send Success Response ---
     return new Response(JSON.stringify({ recipe: recipeData }), {
@@ -208,7 +245,6 @@ Ensure the output is ONLY the JSON object, with no additional text before or aft
       status: 200
     });
 
-  // --- General Error Handling ---
   } catch (error) {
     console.error('Edge Function Execution Error:', error);
     
@@ -216,25 +252,23 @@ Ensure the output is ONLY the JSON object, with no additional text before or aft
     let statusCode = 500;
 
     if (error instanceof Error) {
-        errorMessage = error.message;
-        // Check for specific error types if needed
-        if (error.message.includes("OPENAI_API_KEY")) {
-             statusCode = 500; // Internal configuration error
-        } else if (error.message.includes("quota")) { // Simplified quota check
-             errorMessage = 'OpenAI quota exceeded. Please try again later.';
-             statusCode = 429;
-        } else if (error.message.includes("parse recipe data")) {
-             statusCode = 500; // Indicate internal failure to process AI response
-        } else if (error.message.includes("Parsed recipe data is incomplete")) {
-             statusCode = 500; // Indicate internal failure after parsing
-        }
-    }
-     
-    // Handle potential OpenAI API errors passed directly
-    if (error.response?.status === 429) { 
+      errorMessage = error.message;
+      if (error.message.includes("OPENAI_API_KEY")) {
+        statusCode = 500;
+      } else if (error.message.includes("quota")) {
         errorMessage = 'OpenAI quota exceeded. Please try again later.';
         statusCode = 429;
-    } // Add other OpenAI status checks if needed (e.g., 401 for auth)
+      } else if (error.message.includes("parse recipe data")) {
+        statusCode = 500;
+      } else if (error.message.includes("Parsed recipe data is incomplete")) {
+        statusCode = 500;
+      }
+    }
+     
+    if (error.response?.status === 429) { 
+      errorMessage = 'OpenAI quota exceeded. Please try again later.';
+      statusCode = 429;
+    }
 
     return new Response(
       JSON.stringify({ error: errorMessage }), 

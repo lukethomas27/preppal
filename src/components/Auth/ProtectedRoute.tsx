@@ -6,12 +6,14 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAuth?: boolean;
   redirectTo?: string;
+  isAuthPage?: boolean;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   requireAuth = true,
-  redirectTo = '/login'
+  redirectTo = '/login',
+  isAuthPage = false
 }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
@@ -29,7 +31,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  if (!requireAuth && user) {
+  if (isAuthPage && user) {
     // If user is logged in and trying to access auth pages, redirect to home
     return <Navigate to="/recipe-generator" replace />;
   }

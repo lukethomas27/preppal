@@ -15,6 +15,7 @@ import ForgotPassword from './components/Auth/ForgotPassword';
 import ResetPassword from './components/Auth/ResetPassword';
 import VerifyEmail from './components/Auth/VerifyEmail';
 import Dashboard from './components/Dashboard';
+import About from './components/About';
 import './App.css';
 import { useAuth } from './contexts/AuthContext';
 
@@ -27,18 +28,19 @@ const App: React.FC = () => {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Layout><LandingPage /></Layout>} />
-          <Route path="/login" element={<ProtectedRoute requireAuth={false}><Layout><Login /></Layout></ProtectedRoute>} />
-          <Route path="/signup" element={<ProtectedRoute requireAuth={false}><Layout><Signup /></Layout></ProtectedRoute>} />
-          <Route path="/forgot-password" element={<ProtectedRoute requireAuth={false}><Layout><ForgotPassword /></Layout></ProtectedRoute>} />
-          <Route path="/reset-password" element={<ProtectedRoute requireAuth={false}><Layout><ResetPassword /></Layout></ProtectedRoute>} />
-          <Route path="/verify-email" element={<ProtectedRoute requireAuth={false}><Layout><VerifyEmail /></Layout></ProtectedRoute>} />
+          <Route path="/about" element={<Layout><About /></Layout>} />
+          <Route path="/login" element={<ProtectedRoute requireAuth={false} isAuthPage><Layout><Login /></Layout></ProtectedRoute>} />
+          <Route path="/signup" element={<ProtectedRoute requireAuth={false} isAuthPage><Layout><Signup /></Layout></ProtectedRoute>} />
+          <Route path="/forgot-password" element={<ProtectedRoute requireAuth={false} isAuthPage><Layout><ForgotPassword /></Layout></ProtectedRoute>} />
+          <Route path="/reset-password" element={<ProtectedRoute requireAuth={false} isAuthPage><Layout><ResetPassword /></Layout></ProtectedRoute>} />
+          <Route path="/verify-email" element={<ProtectedRoute requireAuth={false} isAuthPage><Layout><VerifyEmail /></Layout></ProtectedRoute>} />
 
           {/* Protected Routes */}
           <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
           <Route 
             path="/recipe-generator" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requireAuth={false}>
                 <Layout>
                   <RecipeGenerator onRecipeGenerated={setGeneratedRecipe} />
                 </Layout>
@@ -48,7 +50,7 @@ const App: React.FC = () => {
           <Route 
             path="/recipe" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requireAuth={false}>
                 <Layout>
                   {generatedRecipe ? <RecipeDisplay recipe={generatedRecipe} /> : <Navigate to="/recipe-generator" />}
                 </Layout>

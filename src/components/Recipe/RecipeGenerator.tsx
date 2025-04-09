@@ -12,13 +12,14 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [remainingAttempts, setRemainingAttempts] = useState<number | null>(null);
   const [generatedRecipe, setGeneratedRecipe] = useState<any>(null);
   const [formData, setFormData] = useState({
     mood: '',
     dietaryPreferences: '',
     ingredients: '',
     cookingTime: '',
-    difficulty: 'any',
+    difficultyLevel: '',
     proteinGoal: '',
     calorieGoal: '',
     totalServings: '2'
@@ -32,7 +33,7 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
     { id: 'dietaryPreferences', label: 'Dietary Preferences' },
     { id: 'ingredients', label: 'Available Ingredients' },
     { id: 'cookingTime', label: 'Max Cooking Time' },
-    { id: 'difficulty', label: 'Difficulty Level' },
+    { id: 'difficultyLevel', label: 'Difficulty Level' },
     { id: 'proteinGoal', label: 'Protein Goal (g/serving)' },
     { id: 'calorieGoal', label: 'Calorie Goal (kcal/serving)' },
     { id: 'totalServings', label: 'Total Servings' }
@@ -104,7 +105,7 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
       dietaryPreferences: '',
       ingredients: '',
       cookingTime: '',
-      difficulty: 'any',
+      difficultyLevel: '',
       proteinGoal: '',
       calorieGoal: '',
       totalServings: '2'
@@ -113,7 +114,7 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
     setError(null);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -140,30 +141,30 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
 
     try {
       const { data, error } = await supabase.functions.invoke('generate-recipe', {
-        body: {
-          mood: formData.mood,
-          dietaryPreferences: formData.dietaryPreferences,
-          ingredients: formData.ingredients,
-          cookingTime: formData.cookingTime,
-          difficultyLevel: formData.difficulty,
-          proteinGoal: formData.proteinGoal,
-          calorieGoal: formData.calorieGoal,
-          totalServings: formData.totalServings
-        }
+        body: formData
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('weekly limit')) {
+          setError('You\'ve reached your weekly limit of 5 recipe generations. Please create an account for unlimited access.');
+        } else {
+          setError(error.message);
+        }
+        return;
+      }
 
-      if (data.recipe) {
+      if (data?.recipe) {
         setGeneratedRecipe(data.recipe);
         setShowForm(false);
         if (onRecipeGenerated) {
           onRecipeGenerated(data.recipe);
         }
+      } else {
+        setError('Failed to generate recipe. Please try again.');
       }
     } catch (err) {
       console.error('Error generating recipe:', err);
-      setError('Failed to generate recipe. Please try again.');
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -222,6 +223,17 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
               <p className="text-xl text-gray-600">Let's create something delicious together</p>
             </div>
 
+            {!user && (
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-blue-800">
+                  You can generate up to 5 recipes without an account.
+                  <a href="/signup" className="text-blue-600 hover:text-blue-800 font-semibold ml-1">
+                    Create an account
+                  </a> for unlimited access!
+                </p>
+              </div>
+            )}
+
             {error && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -267,7 +279,7 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
                       type="text"
                       name="mood"
                       value={formData.mood}
-                      onChange={handleChange}
+                      onChange={handleInputChange}
                       placeholder="e.g., energetic, cozy, adventurous"
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
                       required
@@ -286,7 +298,7 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
                       type="text"
                       name="dietaryPreferences"
                       value={formData.dietaryPreferences}
-                      onChange={handleChange}
+                      onChange={handleInputChange}
                       placeholder="e.g., vegetarian, gluten-free, low-carb, none"
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
                       disabled={loading}
@@ -303,7 +315,7 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
                       id="ingredients"
                       name="ingredients"
                       value={formData.ingredients}
-                      onChange={handleChange}
+                      onChange={handleInputChange}
                       placeholder="List ingredients you have or want to use (e.g., chicken breast, broccoli, rice)"
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent h-32"
                       disabled={loading}
@@ -321,7 +333,7 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
                       id="cookingTime"
                       name="cookingTime"
                       value={formData.cookingTime}
-                      onChange={handleChange}
+                      onChange={handleInputChange}
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
                       required
                       disabled={loading}
@@ -339,14 +351,14 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
 
                 {activeStep === 4 && (
                   <div className="space-y-4">
-                    <label htmlFor="difficulty" className="block text-lg font-medium text-gray-700">
+                    <label htmlFor="difficultyLevel" className="block text-lg font-medium text-gray-700">
                       {steps[activeStep].label}
                     </label>
                     <select
-                      id="difficulty"
-                      name="difficulty"
-                      value={formData.difficulty}
-                      onChange={handleChange}
+                      id="difficultyLevel"
+                      name="difficultyLevel"
+                      value={formData.difficultyLevel}
+                      onChange={handleInputChange}
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
                       disabled={loading}
                     >
@@ -368,7 +380,7 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
                       type="number"
                       name="proteinGoal"
                       value={formData.proteinGoal}
-                      onChange={handleChange}
+                      onChange={handleInputChange}
                       placeholder="e.g., 30"
                       min="0"
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -388,7 +400,7 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
                       type="number"
                       name="calorieGoal"
                       value={formData.calorieGoal}
-                      onChange={handleChange}
+                      onChange={handleInputChange}
                       placeholder="e.g., 500"
                       min="0"
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -408,7 +420,7 @@ const RecipeGenerator: React.FC<RecipeGeneratorProps> = ({ onRecipeGenerated }) 
                       type="number"
                       name="totalServings"
                       value={formData.totalServings}
-                      onChange={handleChange}
+                      onChange={handleInputChange}
                       placeholder="e.g., 4"
                       min="1"
                       required
